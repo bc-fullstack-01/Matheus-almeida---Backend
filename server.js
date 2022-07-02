@@ -1,12 +1,13 @@
 const http = require('http')
 
-const server = http.createServer((req, res)=>{
-	if (req.url === '/'){
+const server = http.createServer((req, res) => {
+	if (req.url === '/') {
 		res.write('Hello from server')
+		res.end()
 	}
 });
 
-server.on('connection', (stream)=> {
+server.on('connection', (stream) => {
 	console.log('some one connected')
 })
 
