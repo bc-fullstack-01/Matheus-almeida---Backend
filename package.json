@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "express-fs-static.js",
+  "main": "express-static.js",
   "dependencies": {
     "-": "0.0.1",
     "D": "^1.0.0",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/express--fs-static.js"
+    "start": "nodemon src/express-static.js"
   },
   "repository": {
     "type": "git",
