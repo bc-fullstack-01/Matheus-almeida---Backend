@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>posts</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>posts</h1>
+  <p>Click a post below to view their comments.</p>
+  <ul>
+    <% posts.forEach(({ _id, title}) => { %>
+    <li>
+      <form action="/v1/posts/<%= _id %>?_method=delete" method="POST">
+        <a href="/v1/posts/<%= _id %>"><%= title %></a> - <input type="submit" value="del"/>
+      </form>
+    </li>
+    <% }) %>
+  </ul>
+  
+  <a href="/v1/posts/new">new</a>
+
+  <%- include('../footer') %>
+</body>
+</html>
