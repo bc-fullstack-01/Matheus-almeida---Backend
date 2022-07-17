@@ -73,7 +73,7 @@ app.use(function(err, req, res, next){
       url: req.originalUrl
     }) 
   } else {
-    res.status(err.status).render('5xx', {err}) 
+    res.status(err.status || 500).render('5xx', {err}) 
   }
 })
 
