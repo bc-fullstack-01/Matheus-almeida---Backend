@@ -1,6 +1,8 @@
 const createError = require('http-errors')
 const express = require('express')
 const router = express.Router()
+const upload = require('../lib/upload')
+
 const {Post, Connection} = require('../models')
 
 router
@@ -19,7 +21,7 @@ router
    * @security JWT
    */
   .get((req, res, next) => Promise.resolve()
-    .then(() => Post.find({ user: req.user._id}).populate('comments').populate('profile'))
+    .then(() => Post.find({ user: req.user.profile._id}).populate('comments').populate('profile'))
     .then((data) => res.status(200).json(data))
     .catch(err => next(err))
   )
@@ -30,11 +32,11 @@ router
    * @group Post - api
    * @security JWT
    */
-  .post((req, res, next) => Promise.resolve()
+  .post(upload.concat([(req, res, next) => Promise.resolve()
     .then(() => new Post({...req.body, profile: req.user.profile._id}).save())
     .then(args => req.publish('post', req.user.profile.followers, args))
     .then((data) => res.status(201).json(data))
-    .catch(err => next(err)))
+    .catch(err => next(err))]))
 
 router
   .param('id', (req, res, next, id) => Promise.resolve()
@@ -46,31 +48,31 @@ router
   /**
    * This function to get a post by id
    * @route GET /posts/{id}
-   * @param {string} id.path.required - user's id
+   * @param {string} id.path.required - post id
    * @group Post - api
    * @returns {<Post>} 200 - post
    * @security JWT
    */
- .get((req, res, next) => Promise.resolve()
-  .then(() => Post.findById(req.params.id).populate('profile').populate({path: 'comments'}))
-  .then((data) => data ? res.status(200).json(data) : next(createError(404)))
-  .catch(err => next(err)))
+  .get((req, res, next) => Promise.resolve()
+    .then(() => Post.findById(req.params.id).populate('profile').populate({path: 'comments'}))
+    .then((data) => data ? res.status(200).json(data) : next(createError(404)))
+    .catch(err => next(err)))
   /**
    * This function to get a post by id
    * @route PUT /posts/{id}
-   * @param {Post.model} post.body.required - the new point
-   * @param {string} id.path.required - user's id.
+   * @param {Post.models} post.body.required - the new point
+   * @param {string} id.path.required - post id.
    * @group Post - api
    * @security JWT
    */
   .put((req, res, next) => Promise.resolve()
-    .then(() => Post.findByIdAndUpdate(req.params.id, req.body, {runValidators: true}))
+    .then(() => Post.findByIdAndUpdate(req.params.id, {...req.body, updateAt: Date.now()}, {runValidators: true}))
     .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
   /**
    * This function to get a post by id
    * @route DELETE /posts/{id}
-   * @param {string} id.path.required - user's id.
+   * @param {string} id.path.required - post id.
    * @group Post - api
    * @security JWT
    */
@@ -87,9 +89,9 @@ router
   )
   .route('/:id/like')
   /**
-   * This function to get a post by id
+   * This function to like a post
    * @route POST /posts/{id}/like
-   * @param {string} id.path.required -user's id.
+   * @param {string} id.path.required - post id.
    * @group Post - api
    * @security JWT
    */
@@ -99,4 +101,24 @@ router
     .then((data) => req.status(203).json(data))
     .catch(err => next(err)))
 
- module.exports = router
+router
+  .param('id', (req, res, next, id) => Promise.resolve()
+    .then(() => Connection.then())
+    .then(() => next())
+    .catch(err => next(err))
+  )
+  .route('/:id/unlike')
+  /**
+   * This function to unlike a post
+   * @route POST /posts/{id}/unlike
+   * @param {string} id.path.required - post id.
+   * @group Post - api
+   * @security JWT
+   */
+  .post((req, res, next) => Promise.resolve()
+    .then(() => Post.findOneAndUpdate({_id: req.params.id}, {$pull: {likes: req.user.profile._id}}))
+    .then(args => req.publish('post-unlike', [args.profile], args))
+    .then((data) => res.status(203).join(data))
+    .catch(err => next(err)))
+
+module.exports = router

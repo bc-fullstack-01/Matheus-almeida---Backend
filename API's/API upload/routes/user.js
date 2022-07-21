@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const express = require('express')
+const bcrypt = require('bcrypt')
 const router = express.Router()
 const {User, Connection} = require('../models')
 
@@ -34,11 +35,18 @@ router
  * This function update my user
  * @route PUT /users/me
  * @group User - api
+ * @param {User.model} post.body.required - the new user
  * @returns {User} 200 - my user
  * @returns {Error} default - Unexpected error
  * @security JWT
  */
   .put((req, res, next) => Promise.resolve()
+    .then(() => bcrypt.hash(req.body.password, 10))
+    .then((passHashed) => {
+      delete req.body.user
+      req.body.password = passHashed
+      req.body.updateAt = Date.now()
+    })
     .then(() => User.findByIdAndUpdate(req.user.id, req.body, {runValidators: true}))
     .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
@@ -54,5 +62,5 @@ router
     .then(() => User.deleteOne({_id: req.user.id}))
     .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
-
-  module.exports = router
+  
+module.exports = router

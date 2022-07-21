@@ -11,7 +11,7 @@ function createUser (name) {
   return bcrypt.hash('123456', 10)
     .then( password =>
       new User({user: name, password}).save()
-        .then(barba => new Profile({name, user: barba.id}).save()
+        .then(barba => new Profile({name, user: barba._id}).save()
           .then(profile => User.findByIdAndUpdate(barba._id, {profile: profile._id})
             .then(() => profile)
           )
@@ -20,7 +20,7 @@ function createUser (name) {
 }
 
 function createPost(profile) {
-  return new Post({title: 'post1', description: 'post 1', profile: profile._id}).save()
+  return new Post({title: 'post1', description: 'post1', profile: profile._id}).save()
     .then(post => new Comment({ description: 'comment 1', post: post._id, profile: profile._id}).save()
       .then(comment => Post.findByIdAndUpdate(post._id, {$push: {comments: comment._id}}))
     )
@@ -31,7 +31,7 @@ function follow (profile1, profile2) {
     .then(() => Profile.findByIdAndUpdate(profile2._id, {$push: {followers: profile1._id}}))
 }
 
-Connection
+module.exports = Connection
   .then(() => Promise.all([
     'matheus',
     'estela',
@@ -48,4 +48,3 @@ Connection
     .then(([profile1, profile2]) => Promise.all([createPost(profile1), createPost(profile2)]))
   )
   .then(() => console.log('mongo is seeded'))
-  .catch(err => console.error(err))

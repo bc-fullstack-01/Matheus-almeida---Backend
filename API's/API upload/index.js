@@ -3,7 +3,7 @@ const socketio = require('socket.io')
 const jwt = require('jsonwebtoken')
 const {User: UserModel} = require('./models')
 
-const pubsub = require('./pubsub')
+const pubsub = require('./lib/pubsub')
 const app = require('./app')
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'testtoken'
@@ -24,14 +24,14 @@ liveData.use((socket, next) => {
       UserModel.findOne({
         user
       }).populate('profile')
-        .then(u => {
-          if (u) {
-            socket.profile = u.profile
-            next()
-          } else {
-            next( new Error('Authentication error'))
-          }
-        })
+      .then(u => {
+        if (u) {
+          socket.profile = u.profile
+          next()
+        } else {
+          next( new Error('Authentication error'))
+        }
+      })
     })
   } else {
     next(new Error('Authentication error'))
@@ -61,6 +61,6 @@ pubsub.sub().then((sub) => {
   })
 }).catch(console.error)
 
-server.listen(process.env.PORT || 4000, () => {
+app.listen(process.env.PORT || 4000, () => {
   console.warn(`server listen on http://localhost:${process.env.PORT || 4000}/api-docs`)
 })

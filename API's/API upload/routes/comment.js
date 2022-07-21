@@ -27,7 +27,7 @@ router
  * @returns {Error} default - Unexpected error
  * @security JWT
  */
-   .get((req, res, next) => Promise.resolve()
+ .get((req, res, next) => Promise.resolve()
     .then(() => Comment.find({post: res.locals.post.id}).populate('profile'))
     .then((data) => res.status(200).json(data))
     .catch(err => next(err)))
@@ -40,15 +40,15 @@ router
  * @security JWT
  */
  .post((req, res, next) => Promise.resolve()
-  .then(() => new Comment(Object.assign(req.body, {post: res.locals.post.id, profile: req.user.profile._id})).save())
-  .then((comment) => Post.findById(comment.post)
-    .then(post => Object.assign(post, {comments: [...post.comments, comment._id]}))
-    .then(post => Post.findByIdAndUpdate(comment.post, post))
-    .then(args => req.publish('comment', [args.profile], args))
-    .then(() => comment)
-  )
-  .then((data) => res.status(201).json(data))
-  .catch(err => next(err)))
+    .then(() => new Comment(Object.assign(req.body, {post: res.locals.post.id, profile: req.user.profile._id})).save())
+    .then((comment) => Post.findById(comment.post)
+      .then(post => Object.assign(post, {comments: [...post.comments, comment._id]}))
+      .then(post => Post.findByIdAndUpdate(comment.post, post))
+      .then(args => req.publish('comment', [args.profile], args))
+      .then(() => comment)
+ )
+ .then((data) => res.status(201).json(data))
+ .catch(err => next(err)))
 router
   .param('id', (req, res, next, id) => Promise.resolve()
     .then(() => Connection.then())
@@ -77,23 +77,23 @@ router
  * @group Comment - api
  * @security JWT
  */
- .put((req, res, next) => Promise.resolve()
-  .then(() => Comment.findByIdAndUpdate(req.params.id, req.body, {runValidators: true}))
-  .then((data) => res.status(203).json(data))
-  .catch(err => next(err)))
+  .put((req, res, next) => Promise.resolve()
+    .then(() => Comment.findByIdAndUpdate(req.params.id, {...req.body, updateAt: Date.now()}, {runValidators: true}))
+    .then((data) => res.status(203).json(data))
+    .catch(err => next(err)))
 /**
  * This function to delete a comment by id
  * @route DELETE /posts/{postId}/comments/{id}
- * @param {string} postId.path.required - user's id.
- * @param {string} id.path.required - user's id.
+ * @param {string} postId.path.required - post id.
+ * @param {string} id.path.required - comment id.
  * @group Comment - api
  * @security JWT
  */
- .delete((req, res, next) => Promise.resolve()
-  .then(() => Comment.deleteOne({_id: req.params.id}))
-  .then((data) => res.status(203).json(data))
-  .catch(err => next(err)))
-  
+  .delete((req, res, next) => Promise.resolve()
+    .then(() => Comment.deleteOne({_id: req.params.id}))
+    .then((data) => res.status(203).json(data))
+    .catch(err => next(err)))
+
 router
   .param('id', (req, res, next, id) => Promise.resolve()
     .then(() => Connection.then())
@@ -104,14 +104,35 @@ router
   /**
    * This function to get a post by id
    * @route POST /posts/{postId}/comments/{id}/like
-   * @param {string} postId.path.required user's id.
-   * @param {string} id.path.required - user's id
+   * @param {string} postId.path.required post id.
+   * @param {string} id.path.required - comment id
    * @group Comment - api
    * @security
    */
+   .post((req, res, next) => Promise.resolve()
+      .then(() => Comment.findOneAndUpdate({_id: req.params.id}, {$addToSet: {likes: req.user.profile._id}}))
+      .then(args => req.publish('comment-like', [args.profile], args))
+      .then((data) => res.status(203).json(data))
+      .catch(err => next(err)))
+
+router 
+  .param('id', (req, res, next, id) => Promise.resolve()
+    .then(() => Connection.then())
+    .then(() => next())
+    .catch(err => next(err))
+  )
+  .route('/:postId/comments/:id/unlike')
+  /**
+   * This function to get a post by id
+   * @route POST /posts/{postId}/comments/{id}/unlike
+   * @param {string} postId.path.required - post id.
+   * @param {string} id.path.required - comment id.
+   * @group Comment- api
+   * @security JWT
+   */
   .post((req, res, next) => Promise.resolve()
-    .then(() => Comment.findOneAndUpdate({_id: req.params.id}, {$addToSet: {likes: req.user.profile._id}}))
-    .then(args => req.publish('comment-like', [args.profile], args))
+    .then(() => Comment.findOneAndUpdate({_id: req.params.id}, {$pull: {likes: req.user.profile._id}}))
+    .then(args => req.publish('comment-unlike', [args.profile], args))
     .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
 

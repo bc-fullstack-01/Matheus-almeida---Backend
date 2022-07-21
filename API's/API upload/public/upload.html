@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <form id="postUpload" enctype="multipart/form-data">
+    <label for="token">Token</label>
+    <input id="token" name="authorization" type="text"/>
+
+    <label for="post">post</label>
+    <input id="post" type="text" name="title"/>
+
+    <label for="file" class="custom-uploader">Upload Your File</label>
+    <input id="file" type="file" name="file"
+      accept="image/jpeg,image/gif,image/png,image/x-eps">
+
+    <button type="submit" name="submit" class="btn btn-success">
+      Upload File
+    </button>
+  </form>
+  <script>
+    var form = document.getElementById("postUpload")
+
+    form.addEventListener('submit', upload, true)
+    let Data
+    function upload(e){
+      e.preventDefault()
+      const form = new FormData(e.target)
+      data = Object.fromEntries(form.entries())
+      console.log(data)
+      return fetch('/v1/posts', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          Authorization: `Bearer ${data["authorization"]}`,
+          Accept: "application/json",
+        },
+        body: form
+      })
+      .then(args => console.log(args))
+      .catch(args => console.error(args))
+    }
+  </script>
+</body>
+</html>
