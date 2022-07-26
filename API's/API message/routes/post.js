@@ -96,7 +96,7 @@ router
   .post((req, res, next) => Promise.resolve()
     .then(() => Post.findOneAndUpdate({_id: req.params.id}, {$addToSet: {likes: req.user.profile._id}}))
     .then(args => req.publish('post-like', [args.profile], args))
-    .then((data) => req.status(203).json(data))
+    .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
 
  module.exports = router

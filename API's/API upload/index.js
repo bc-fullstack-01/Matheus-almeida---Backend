@@ -48,18 +48,16 @@ liveData.on('connection', function (socket) {
     console.error(err)
   })
   socket.emit('connect_profile', socket.profile)
-})
 
-pubsub.sub().then((sub) => {
-  sub.on('message', function (message, content, ackOrNack){
-    ackOrNack()
-    Object.entries(Object.fromEntries(liveData.sockets))
-      .filter(([, v]) => content.keys.includes(v.profile._id.toString()))
-      .map(([k, v]) => {
-        return v.emit(content.type, content.payload)
-      })
-  })
-}).catch(console.error)
+  pubsub.sub().then((sub) => {
+    sub.on('message', function (message, content, ackOrNack){
+      ackOrNack()
+      if(content.keys.includes(socket.profile.id.toString())){
+        socket.emit(content.type, content.value)
+    }   
+    })
+  }).catch(console.error)
+})
 
 app.listen(process.env.PORT || 4000, () => {
   console.warn(`server listen on http://localhost:${process.env.PORT || 4000}/api-docs`)

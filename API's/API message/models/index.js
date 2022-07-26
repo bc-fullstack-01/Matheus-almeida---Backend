@@ -12,7 +12,7 @@
 
 const mongoose = require('mongoose')
 const connect = mongoose.connect(
-  `${(process.env.MONGO_URL || 'mongodb://localhost:27017/mydb2')}_${process.env.NODE_ENV || 'development'}`
+  `${(process.env.MONGO_URL || 'mongodb://localhost:27017/mydb3')}_${process.env.NODE_ENV || 'development'}`
 )
 
 exports.Post = require('./post.js')

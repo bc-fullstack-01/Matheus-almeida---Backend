@@ -7,10 +7,18 @@
     },
     "host": "localhost:4000",
     "basePath": "/v1",
+    "securityDefinitions": {
+      "JWT": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Bearer <token>"
+      }
+    },
     "produces": [
       "application/json"
     ],
     "schemes": ["http"]
   },
-  "files": ["./routers/**/*.js", "./models/**/*.js"]
+  "files": ["./routes/**/*.js", "./models/**/*.js"]
 }

@@ -35,7 +35,7 @@ router
   )
   /**
    * This function creates a user
-   * @route POST /security/rgister
+   * @route POST /security/register
    * @param {Registry.model} post.body.required - the new user
    * @group Security - api
    */

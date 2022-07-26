@@ -7,6 +7,11 @@
     "lib": "lib"
   },
   "scripts": {
+    "mongo:start": "doker run --name mongodb -d -p 27017:27017 mongo:latest",
+    "mongo:rm": "docker rm -f mongodb",
+    "mongo:seed": "node seed.js",
+    "mongo:rs": "npm run mongo:rm && npm run mongo:start && npm run mongo:seed",
+    "start": "index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

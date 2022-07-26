@@ -107,7 +107,7 @@ router
    * @param {string} postId.path.required post id.
    * @param {string} id.path.required - comment id
    * @group Comment - api
-   * @security
+   * @security JWT
    */
    .post((req, res, next) => Promise.resolve()
       .then(() => Comment.findOneAndUpdate({_id: req.params.id}, {$addToSet: {likes: req.user.profile._id}}))

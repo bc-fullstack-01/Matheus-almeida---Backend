@@ -1,45 +1,41 @@
-const Rascal = require('rascal')
-const defaultConfig = require('./config')
-defaultConfig.vhosts['/'].connection.url = process.env.AMQP_URL || defaultConfig.vhosts['/'].connection.url
-const config = Rascal.withDefaultConfig('defaultConfig')
-const publisher = Object.keys(defaultConfig.vhosts['/'].publications)[0]
-const consumer = Object.keys(defaultConfig.vhosts['/'].subscriptions)[0]
+const Broker = require('rascal').BrokerAsPromised;
+const config = require("./config.json")
+
+
+
 module.exports = {
-  pub: (req, res, next) => Rascal.Broker.create(Rascal.withDefaultConfig(config), function(err, broker) {
-    if (err) next(err)
-    req.publish = (type, keys, value) => new Promise((resolve, reject) => {
-      const msg = {
-        type,
-        payload: value,
-        keys
-      }
-      broker.publish(publisher, msg, function(err, publication) {
-        if (err) reject(err)
-        publication.on('error', reject)
-        resolve(value)
-      })
-    })
-    next()
-  }),
-  sub: () => Promise.resolve(Rascal.withDefaultConfig(config))
-    .then((conf) => new Promise((resolve, reject) => Rascal.Broker.create(conf, (err, broker) => {
-      if (err) {
-        if (err.code === 'ECONNREFUSED') {
-          console.error(err)
-          process.exit(1)
-        } else {
-          reject(err)
+    pub: (async (req, res, next) =>{
+        try{
+            const broker = await Broker.create(config);
+            req.publish = async (type, keys, value) => {
+                try{
+                    const msg ={
+                        type,
+                        keys,
+                        value
+                    }
+                    
+                    const publication = await broker.publish("post_pub", msg)
+                    publication.on('error', console.error)
+                    return value
+                }
+                catch(err){
+                    console.log(err)
+                }
+            }
+
+            next()
+        }catch(err){
+            next(err)
         }
-      }
-      resolve(broker)
-    })))
-    .then(broker => new Promise((resolve, reject) => broker.subscribe(consumer, (err, subscription) => {
-      if (err) reject(err)
-      resolve(subscription)
-    })))
-    .then(subscription => {
-      subscription.on('error', (err) => {throw err})
-      subscription.on('cancel', (err) => {throw err})
-      return subscription
+    }),
+    sub:(async () =>{
+        try{
+            const broker = await Broker.create(config)
+            const subscription = await broker.subscribe('post_sub')
+            return subscription
+        }catch(err){
+            console.log(err)
+        }
     })
 }

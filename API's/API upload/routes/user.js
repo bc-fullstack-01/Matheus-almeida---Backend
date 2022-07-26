@@ -28,7 +28,7 @@ router
  * @security JWT
  */
   .get((req, res, next) => Promise.resolve()
-    .then(() => User.findById(req.user.id).populate({path: 'followers'}))
+    .then(() => User.findById(req.user.id).populate({path: 'profile'}))
     .then((data) => data ? res.status(200).json(data) : next(createError(404)))
     .catch(err => next(err)))
 /**
