@@ -34,21 +34,21 @@ router
 /**
  * This function post a comment into a post
  * @route POST /posts/{postId}/comments
- * @param {string} postId.path.required - user's id.
- * @param {comment.model} comment.body.required - the new point
+ * @param {string} postId.path.required - post id.
+ * @param {Comment.model} comment.body.required - the new point
  * @group Comment - api
  * @security JWT
  */
- .post((req, res, next) => Promise.resolve()
+  .post((req, res, next) => Promise.resolve()
     .then(() => new Comment(Object.assign(req.body, {post: res.locals.post.id, profile: req.user.profile._id})).save())
     .then((comment) => Post.findById(comment.post)
       .then(post => Object.assign(post, {comments: [...post.comments, comment._id]}))
       .then(post => Post.findByIdAndUpdate(comment.post, post))
       .then(args => req.publish('comment', [args.profile], args))
       .then(() => comment)
- )
- .then((data) => res.status(201).json(data))
- .catch(err => next(err)))
+    )
+    .then((data) => res.status(201).json(data))
+    .catch(err => next(err)))
 router
   .param('id', (req, res, next, id) => Promise.resolve()
     .then(() => Connection.then())

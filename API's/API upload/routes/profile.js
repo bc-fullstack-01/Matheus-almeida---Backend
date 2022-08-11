@@ -76,12 +76,12 @@ router
    * @route POST /profiles/{id}/follow
    * @param {string} id.path.required - user's id.
    * @group Profile - api
-   * @secuity JWT
+   * @security JWT
    */
   .post((req, res, next) => Promise.resolve()
     .then(() => Profile.findOneAndUpdate({_id: req.params.id}, {$push: {followers: req.user.profile._id}}))
     .then(() => Profile.findOneAndUpdate({_id: req.user.profile.id}, {$push: {following: req.params.id}}))
-    .then((data) => req.status(203).json(data))
+    .then((data) => res.status(203).json(data))
     .catch(err => next(err)))
   
 module.exports = router

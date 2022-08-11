@@ -12,7 +12,7 @@ const upload = multer({
 const bucketName = 'first-bucket'
 const config = {
   region: 'us-east-1',
-  endpoint: process.env.BUCKET_ENDPOINT || 'http://localhost:9000/',
+  endpoint: process.env.BUCKET_ENDPOINT || 'http://192.168.0.24:9000/',
   forcePathStyle: true,
   sslEnabled: false,
   signatureVersion: 'v4',
