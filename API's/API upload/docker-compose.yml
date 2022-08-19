@@ -70,6 +70,6 @@ services:
     networks:
       - mynet
   
-  networks:
-    mynet:
-      driver: bridge
+networks:
+  mynet:
+    driver: bridge
